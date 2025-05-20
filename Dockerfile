@@ -6,6 +6,7 @@ COPY package*.json ./
 
 RUN npm install --production=false
 
+# 모든 소스 코드 복사
 COPY . .
 
 RUN npm run build

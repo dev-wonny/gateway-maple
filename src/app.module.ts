@@ -1,8 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { ProxyModule } from './proxy/proxy.module';
+import { AuthController } from './controllers/auth.controller';
+import { UsersController } from './controllers/users.controller';
+import { EventsController } from './controllers/events.controller';
+import { ConditionsController } from './controllers/conditions.controller';
 
 @Module({
   imports: [
@@ -10,34 +15,16 @@ import { AppService } from './app.service';
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
-    ClientsModule.registerAsync([
-      {
-        name: 'AUTH_SERVICE',
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.TCP,
-          options: {
-            host: configService.get('AUTH_SERVICE_HOST', 'auth'),
-            port: configService.get('AUTH_SERVICE_PORT', 3000),
-          },
-        }),
-      },
-      {
-        name: 'EVENT_SERVICE',
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.TCP,
-          options: {
-            host: configService.get('EVENT_SERVICE_HOST', 'event'),
-            port: configService.get('EVENT_SERVICE_PORT', 3000),
-          },
-        }),
-      },
-    ]),
+    AuthModule,
+    ProxyModule,
   ],
-  controllers: [AppController],
+  controllers: [
+    AppController, 
+    AuthController, 
+    UsersController,
+    EventsController,
+    ConditionsController
+  ],
   providers: [AppService],
 })
 export class AppModule {}
